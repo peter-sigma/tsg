@@ -1,0 +1,19 @@
+{% extends 'tts_app/base.html' %}
+
+{% block content %}
+  <h2>Your Audio Output</h2>
+  {% if audio_url %}
+    <audio controls>
+      <source src="{{ audio_url }}" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
+    <p>
+      <a href="{{ audio_url }}" download>
+         <i class="fa-solid fa-download"></i> Download Audio
+      </a>
+    </p>
+  {% else %}
+    <p>No audio file found.</p>
+  {% endif %}
+  <p><a href="{% url 'tts_app:index' %}">Convert another text</a></p>
+{% endblock %}

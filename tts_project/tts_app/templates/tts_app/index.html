@@ -1,0 +1,11 @@
+{% extends 'tts_app/base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>Convert Text to Speech</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit"><i class="fa-solid fa-play"></i> Convert</button>
+  </form>
+{% endblock %}
