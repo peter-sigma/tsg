@@ -7,6 +7,7 @@ from .forms import TTSForm
 from django_q.tasks import async_task  # Import Django Q's async_task
 from .tasks import process_tts_task
 from django.conf import settings
+from django.http import JsonResponse
 
 
 # (Keep your TTS functions defined here or imported from elsewhere if you refactor)
@@ -50,6 +51,9 @@ def index(request):
 
 def check_status(request):
     audio_file = request.GET.get('audio')
+    if not audio_file:
+        return JsonResponse({'ready': False, 'error': 'No audio file specified'})
+    # Build the absolute file path (adjust this if needed)
     file_path = os.path.join(settings.BASE_DIR, 'tts_app', 'static', 'audio', audio_file)
     if os.path.exists(file_path):
         return JsonResponse({'ready': True})

@@ -2,20 +2,53 @@
 
 {% block content %}
   <h2>Your Audio Output</h2>
-  {% if audio_url %}
-    <audio controls>
-      <source src="{{ audio_url }}" type="audio/mp3">
-      Your browser does not support the audio element.
-    </audio>
-    <p>
-      <a href="{{ audio_url }}" download>
-         <i class="fa-solid fa-download"></i> Download Audio
-      </a>
-    </p>
-  {% else %}
-    <p>No audio file found.</p>
-  {% endif %}
+  <div id="audio-container">
+    {% if audio_url %}
+      <!-- Initially, show a loading message until polling confirms the file is ready -->
+      <p id="status-message">Your audio is being processed. Please wait...</p>
+    {% else %}
+      <p>No audio file found.</p>
+    {% endif %}
+  </div>
   <p><a href="{% url 'tts_app:index' %}">Convert another text</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Extract the audio filename from the audio URL (assuming it follows the format /static/audio/filename.mp3)
+  const audioFilename = "{{ audio_url|cut:'/static/audio/' }}";
+
+  function checkStatus() {
+    fetch("{% url 'tts_app:check_status' %}?audio=" + audioFilename)
+      .then(response => response.json())
+      .then(data => {
+        if (data.ready) {
+          // File is ready; update the page to show the audio player and download link
+          document.getElementById("audio-container").innerHTML = `
+            <audio controls>
+              <source src="{{ audio_url }}" type="audio/mp3">
+              Your browser does not support the audio element.
+            </audio>
+            <p>
+              <a href="{{ audio_url }}" download>
+                <i class="fa-solid fa-download"></i> Download Audio
+              </a>
+            </p>
+          `;
+        } else {
+          // File not ready; try again after a delay
+          setTimeout(checkStatus, 5000);
+        }
+      })
+      .catch(error => {
+        console.error("Error checking status:", error);
+        setTimeout(checkStatus, 5000);
+      });
+  }
+
+  // Start polling after a delay (5 seconds)
+  setTimeout(checkStatus, 5000);
+</script>
 {% endblock %}
 
 
