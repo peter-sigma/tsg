@@ -9,6 +9,7 @@ from .tasks import process_tts_task
 from django.conf import settings
 from django.http import JsonResponse
 import hashlib
+from .models import ConversionLog
 
 
 # (Keep your TTS functions defined here or imported from elsewhere if you refactor)
@@ -42,13 +43,21 @@ def index(request):
 
             if output_filename:
                 output_path = os.path.join(AUDIO_OUTPUT_DIR, output_filename)
+                log = ConversionLog.objects.create(
+                    text=text,
+                    voice=voice_choice,
+                    status='PENDING'
+                )
                 # Check if the file already exists in the cache.
                 if os.path.exists(output_path):
                     # If it exists, reuse the cached audio file.
                     print("File retrieved. No need to reconvert.")
+                    log.status = 'COMPLETED'
+                    log.output_filename = output_filename
+                    log.save()
                     return HttpResponseRedirect(reverse('tts_app:result') + f'?audio={output_filename}')
                     # Otherwise, enqueue the TTS conversion task.
-                async_task(process_tts_task, text, voice_choice, output_path)
+                async_task(process_tts_task, text, voice_choice, output_path, log.id)
                 return HttpResponseRedirect(
                     reverse('tts_app:result') + f'?audio={output_filename}'
                 )

@@ -4,8 +4,8 @@ from .tts_services import tts_using_edge, tts_using_gtts, tts_using_voicerss
 
 logger = logging.getLogger(__name__)
 
-def process_tts_task(text, voice_choice, output_path):
-    logger.info("Starting TTS conversion for voice_choice: %s, output_path: %s", voice_choice, output_path)
+def process_tts_task(text, voice_choice, output_path, log_id):
+    logger.info("Starting TTS conversion for voice_choice: %s, output_path: %s", voice_choice, output_path, log_id)
     try:
         if voice_choice == 'edge_female':
             voice = "en-US-JennyNeural"
@@ -24,6 +24,6 @@ def process_tts_task(text, voice_choice, output_path):
         elif voice_choice.startswith('voicerss_'):
             voice = voice_choice.split('_')[1].capitalize()
             tts_using_voicerss(text, language="en-us", voice=voice, output_file=output_path)
-        logger.info("TTS conversion completed; file should be saved at: %s", output_path)
+        logger.info("TTS conversion completed; file should be saved at: %s", output_path, log_id)
     except Exception as e:
         logger.exception("Error during TTS conversion: %s", e)
